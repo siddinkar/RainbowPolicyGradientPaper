@@ -5,7 +5,7 @@ import torch
 from torch.optim import Adam
 import gym
 import time
-import TD3.core as core
+import core
 from utils.logger import EpochLogger, setup_logger_kwargs
 
 

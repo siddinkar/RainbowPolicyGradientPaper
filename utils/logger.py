@@ -9,9 +9,9 @@ import warnings
 
 
 
-def setup_logger_kwargs(exp_name, seed=None, data_dir=None, datestamp=False):
+def setup_logger_kwargs(exp_name, seed=None, data_dir=None, datestamp=True):
     # Datestamp forcing
-    datestamp = datestamp or FORCE_DATESTAMP
+    datestamp = datestamp
 
     # Make base path
     ymd_time = time.strftime("%Y-%m-%d_") if datestamp else ''
@@ -26,7 +26,7 @@ def setup_logger_kwargs(exp_name, seed=None, data_dir=None, datestamp=False):
             subfolder = ''.join([exp_name, '_s', str(seed)])
         relpath = osp.join(relpath, subfolder)
 
-    data_dir = data_dir or DEFAULT_DATA_DIR
+    data_dir = data_dir or "../"
     logger_kwargs = dict(output_dir=osp.join(data_dir, relpath),
                          exp_name=exp_name)
     return logger_kwargs
@@ -58,7 +58,7 @@ def colorize(string, color, bold=False, highlight=False):
 
 class Logger:
 
-    def __init__(self, output_dir=None, f_name="progress.txt", exp_name=None):
+    def __init__(self, output_dir=None, output_fname="progress.txt", exp_name=None):
 
         self.output_dir = output_dir or "/tmp/experiments/%i" % int(time.time())
         if osp.exists(self.output_dir):
