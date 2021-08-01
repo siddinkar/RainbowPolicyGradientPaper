@@ -6,6 +6,7 @@ from torch.optim import Adam
 import gym
 import time
 import TD3.core as core
+from utils.logger import EpochLogger, setup_logger_kwargs
 
 
 class Buffer:
@@ -44,6 +45,10 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         noise_clip=0.5, policy_delay=2, num_test_episodes=10, max_ep_len=1000,
         logger_kwargs=dict(), save_freq=1):
 
+    # logger
+    logger = EpochLogger(**logger_kwargs)
+    logger.save_config(locals())
+
     # seeding
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -67,6 +72,9 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     q_params = itertools.chain(ac.q1.parameters(), ac.q2.parameters())
 
     replay_buffer = Buffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size)
+
+    var_counts = tuple(core.count_vars(module) for module in [ac.pi, ac.q1, ac.q2])
+    logger.log('\nNumber of parameters: \t pi: %d, \t q1: %d, \t q2: %d\n' % var_counts)
 
     def compute_loss_q(data):
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
@@ -223,6 +231,8 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--exp_name', type=str, default='td3')
     args = parser.parse_args()
+
+    logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed)
 
     td3(lambda: gym.make(args.env), actor_critic=core.MLPActorCritic,
         ac_kwargs=dict(hidden_sizes=[args.hid] * args.l),
