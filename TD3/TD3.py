@@ -5,9 +5,11 @@ import torch
 from torch.optim import Adam
 import gym
 import time
-import core
+import TD3.core as core
 from utils.logger import EpochLogger, setup_logger_kwargs
 
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Buffer:
 
@@ -39,11 +41,14 @@ class Buffer:
 
 
 def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
-        steps_per_epoch=4000, epochs=100, replay_size=int(1e6), gamma=0.99,
+        steps_per_epoch=5000, epochs=5, replay_size=int(1e6), gamma=0.99,
         polyak=0.995, pi_lr=1e-3, q_lr=1e-3, batch_size=100, start_steps=10000,
         update_after=1000, update_every=50, act_noise=0.1, target_noise=0.2,
         noise_clip=0.5, policy_delay=2, num_test_episodes=10, max_ep_len=1000,
         logger_kwargs=dict(), save_freq=1):
+
+    """ Hello World """
+
 
     # logger
     logger = EpochLogger(**logger_kwargs)
@@ -61,7 +66,7 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     act_limit = env.action_space.high[0]
 
     #
-    ac = actor_critic(env, **ac_kwargs)
+    ac = actor_critic(env.observation_space, env.action_space, **ac_kwargs)
     ac_targ = deepcopy(ac)
 
 
@@ -78,6 +83,13 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
 
     def compute_loss_q(data):
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
+
+        o = torch.FloatTensor(o).cuda(device)
+        a = torch.FloatTensor(a).cuda(device)
+        r = torch.FloatTensor(r).cuda(device)
+        o2 = torch.FloatTensor(o2).cuda(device)
+        d = torch.FloatTensor(d).cuda(device)
+
 
         # estimates
         q1 = ac.q1(o, a)
@@ -105,14 +117,15 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         loss_q = loss_q1 + loss_q2
 
         # Useful info for logging
-        loss_info = dict(Q1Vals=q1.detach().numpy(),
-                         Q2Vals=q2.detach().numpy())
+        loss_info = dict(Q1Vals=q1.cpu().detach().numpy(),
+                         Q2Vals=q2.cpu().detach().numpy())
 
         return loss_q, loss_info
 
     # Set up function for computing TD3 pi loss
     def compute_loss_pi(data):
         o = data['obs']
+        o = torch.FloatTensor(o).cuda(device)
         q1_pi = ac.q1(o, ac.pi(o))
         return -q1_pi.mean()
 
@@ -120,12 +133,16 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     pi_optimizer = Adam(ac.pi.parameters(), lr=pi_lr)
     q_optimizer = Adam(q_params, lr=q_lr)
 
+    logger.setup_pytorch_saver(ac)
+
     def update(data, timer):
         # First run one gradient descent step for Q1 and Q2
         q_optimizer.zero_grad()
         loss_q, loss_info = compute_loss_q(data)
         loss_q.backward()
         q_optimizer.step()
+
+        logger.store(LossQ=loss_q.item(), **loss_info)
 
         # Possibly update pi and target networks
         if timer % policy_delay == 0:
@@ -145,6 +162,8 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
             for p in q_params:
                 p.requires_grad = True
 
+            logger.store(LossPi=loss_pi.item())
+
             # Finally, update target networks by polyak averaging.
             with torch.no_grad():
                 for p, p_targ in zip(ac.parameters(), ac_targ.parameters()):
@@ -154,7 +173,7 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
                     p_targ.data.add_((1 - polyak) * p.data)
 
     def get_action(o, noise_scale):
-        a = ac.act(torch.as_tensor(o, dtype=torch.float32))
+        a = ac.act(torch.as_tensor(o, dtype=torch.float32).cuda(device))
         a += noise_scale * np.random.randn(act_dim)
         return np.clip(a, -act_limit, act_limit)
 
@@ -166,6 +185,7 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
                 o, r, d, _ = test_env.step(get_action(o, 0))
                 ep_ret += r
                 ep_len += 1
+            logger.store(TestEpRet=ep_ret, TestEpLen=ep_len)
 
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
@@ -202,6 +222,7 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
 
         # End of trajectory handling
         if d or (ep_len == max_ep_len):
+            logger.store(EpRet=ep_ret, EpLen=ep_len)
             o, ep_ret, ep_len = env.reset(), 0, 0
 
         # Update handling
@@ -216,9 +237,23 @@ def td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
 
             # Save model
             if (epoch % save_freq == 0) or (epoch == epochs):
-
+                logger.save_state({'env': env}, None)
                 # Test the performance of the deterministic version of the agent.
                 test_agent()
+
+                # Log info about epoch
+                logger.log_tabular('Epoch', epoch)
+                logger.log_tabular('EpRet', with_min_and_max=True)
+                logger.log_tabular('TestEpRet', with_min_and_max=True)
+                logger.log_tabular('EpLen', average_only=True)
+                logger.log_tabular('TestEpLen', average_only=True)
+                logger.log_tabular('Time Steps', t)
+                logger.log_tabular('Q1Vals', with_min_and_max=True)
+                logger.log_tabular('Q2Vals', with_min_and_max=True)
+                logger.log_tabular('LossPi', average_only=True)
+                logger.log_tabular('LossQ', average_only=True)
+                logger.log_tabular('Time', time.time() - start_time)
+                logger.dump_tabular()
 
 if __name__ == '__main__':
     import argparse
@@ -228,15 +263,15 @@ if __name__ == '__main__':
     parser.add_argument('--l', type=int, default=2)
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--seed', '-s', type=int, default=0)
-    parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--exp_name', type=str, default='td3')
+    parser.add_argument('--epochs', type=int, default=5)
+    parser.add_argument('--exp_name', type=str, default='td3test2')
     args = parser.parse_args()
 
     logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed)
 
     td3(lambda: gym.make(args.env), actor_critic=core.MLPActorCritic,
         ac_kwargs=dict(hidden_sizes=[args.hid] * args.l),
-        gamma=args.gamma, seed=args.seed, epochs=args.epochs)
+        gamma=args.gamma, seed=args.seed, epochs=args.epochs, logger_kwargs=logger_kwargs)
 
 
 

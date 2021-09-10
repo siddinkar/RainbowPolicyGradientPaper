@@ -6,12 +6,16 @@ import tensorflow as tf
 import torch
 import os.path as osp, time, atexit, os
 import warnings
+from utils.mpi_tools import proc_id, mpi_statistics_scalar
+from utils.serialization_utils import convert_json
+from user_config import DEFAULT_DATA_DIR, FORCE_DATESTAMP, \
+                               DEFAULT_SHORTHAND, WAIT_BEFORE_LAUNCH
 
 
 
-def setup_logger_kwargs(exp_name, seed=None, data_dir=None, datestamp=True):
+def setup_logger_kwargs(exp_name, seed=None, data_dir=None, datestamp=False):
     # Datestamp forcing
-    datestamp = datestamp
+    datestamp = datestamp or FORCE_DATESTAMP
 
     # Make base path
     ymd_time = time.strftime("%Y-%m-%d_") if datestamp else ''
@@ -26,7 +30,7 @@ def setup_logger_kwargs(exp_name, seed=None, data_dir=None, datestamp=True):
             subfolder = ''.join([exp_name, '_s', str(seed)])
         relpath = osp.join(relpath, subfolder)
 
-    data_dir = data_dir or "../"
+    data_dir = data_dir or DEFAULT_DATA_DIR
     logger_kwargs = dict(output_dir=osp.join(data_dir, relpath),
                          exp_name=exp_name)
     return logger_kwargs

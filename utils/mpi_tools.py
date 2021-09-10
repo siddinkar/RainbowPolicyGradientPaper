@@ -63,30 +63,30 @@ def mpi_op(x, op):
 def mpi_sum(x):
     return mpi_op(x, MPI.SUM)
 
-    def mpi_avg(x):
-        """Average a scalar or vector over MPI processes."""
-        return mpi_sum(x) / num_procs()
+def mpi_avg(x):
+    """Average a scalar or vector over MPI processes."""
+    return mpi_sum(x) / num_procs()
 
-    def mpi_statistics_scalar(x, with_min_and_max=False):
-        """
-        Get mean/std and optional min/max of scalar x across MPI processes.
+def mpi_statistics_scalar(x, with_min_and_max=False):
+    """
+    Get mean/std and optional min/max of scalar x across MPI processes.
 
-        Args:
-            x: An array containing samples of the scalar to produce statistics
-                for.
+    Args:
+        x: An array containing samples of the scalar to produce statistics
+            for.
 
-            with_min_and_max (bool): If true, return min and max of x in
-                addition to mean and std.
-        """
-        x = np.array(x, dtype=np.float32)
-        global_sum, global_n = mpi_sum([np.sum(x), len(x)])
-        mean = global_sum / global_n
+        with_min_and_max (bool): If true, return min and max of x in
+            addition to mean and std.
+    """
+    x = np.array(x, dtype=np.float32)
+    global_sum, global_n = mpi_sum([np.sum(x), len(x)])
+    mean = global_sum / global_n
 
-        global_sum_sq = mpi_sum(np.sum((x - mean) ** 2))
-        std = np.sqrt(global_sum_sq / global_n)  # compute global std
+    global_sum_sq = mpi_sum(np.sum((x - mean) ** 2))
+    std = np.sqrt(global_sum_sq / global_n)  # compute global std
 
-        if with_min_and_max:
-            global_min = mpi_op(np.min(x) if len(x) > 0 else np.inf, op=MPI.MIN)
-            global_max = mpi_op(np.max(x) if len(x) > 0 else -np.inf, op=MPI.MAX)
-            return mean, std, global_min, global_max
-        return mean, std
+    if with_min_and_max:
+        global_min = mpi_op(np.min(x) if len(x) > 0 else np.inf, op=MPI.MIN)
+        global_max = mpi_op(np.max(x) if len(x) > 0 else -np.inf, op=MPI.MAX)
+        return mean, std, global_min, global_max
+    return mean, std
