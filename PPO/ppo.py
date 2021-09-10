@@ -8,6 +8,7 @@ from utils.logger import EpochLogger
 from utils.mpi_pytorch import setup_pytorch_for_mpi, sync_params, mpi_avg_grads
 from utils.mpi_tools import mpi_fork, mpi_avg, proc_id, mpi_statistics_scalar, num_procs
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class PPOBuffer:
 
@@ -99,6 +100,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     # Set up function for computing PPO policy loss
     def compute_loss_pi(data):
         obs, act, adv, logp_old = data['obs'], data['act'], data['adv'], data['logp']
+
 
         # Policy loss
         pi, logp = ac.pi(obs, act)
