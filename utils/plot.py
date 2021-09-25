@@ -152,7 +152,7 @@ def get_all_datasets(all_logdirs, legend=None, select=None, exclude=None):
 
 
 def make_plots(all_logdirs, legend=None, xaxis=None, values=None, count=False,
-               font_scale=1.5, smooth=1, select=None, exclude=None, estimator='mean'):
+               font_scale=1.5, smooth=1, select=None, exclude=None, estimator='max'):
     data = get_all_datasets(all_logdirs, legend, select, exclude)
     values = values if isinstance(values, list) else [values]
     condition = 'Condition2' if count else 'Condition1'
@@ -170,7 +170,7 @@ def main():
     parser.add_argument('logdir', nargs='*')
     parser.add_argument('--legend', '-l', nargs='*')
     parser.add_argument('--xaxis', '-x', default='Time Steps')
-    parser.add_argument('--value', '-y', default='Average Return', nargs='*')
+    parser.add_argument('--value', '-y', default=['LossQ', 'StdQ1Vals', 'AverageQ1Vals', 'StdTestEpRet', 'Average Return'], nargs='*')
     parser.add_argument('--count', action='store_true')
     parser.add_argument('--smooth', '-s', type=int, default=1)
     parser.add_argument('--select', nargs='*')

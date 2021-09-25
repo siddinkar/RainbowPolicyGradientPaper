@@ -8,7 +8,6 @@ from utils.logger import EpochLogger
 from utils.mpi_pytorch import setup_pytorch_for_mpi, sync_params, mpi_avg_grads
 from utils.mpi_tools import mpi_fork, mpi_avg, proc_id, mpi_statistics_scalar, num_procs
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class PPOBuffer:
 
@@ -61,7 +60,7 @@ class PPOBuffer:
 
 def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         steps_per_epoch=5000, epochs=200, gamma=0.99, clip_ratio=0.2, pi_lr=3e-4,
-        vf_lr=1e-3, train_pi_iters=80, train_v_iters=80, lam=0.97, max_ep_len=1000,
+        vf_lr=1e-3, train_pi_iters=80, train_v_iters=80, lam=0.97, max_ep_len=1000, num_test_episodes=10,
         target_kl=0.01, logger_kwargs=dict(), save_freq=10):
 
     # Special function to avoid certain slowdowns from PyTorch + MPI combo.
@@ -77,7 +76,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
     np.random.seed(seed)
 
     # Instantiate environment
-    env = env_fn()
+    env, test_env = env_fn(), env_fn()
     obs_dim = env.observation_space.shape
     act_dim = env.action_space.shape
 
@@ -165,6 +164,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
                      DeltaLossPi=(loss_pi.item() - pi_l_old),
                      DeltaLossV=(loss_v.item() - v_l_old))
 
+
     # Prepare for interaction with environment
     start_time = time.time()
     o, ep_ret, ep_len = env.reset(), 0, 0
@@ -225,6 +225,7 @@ def ppo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
         logger.log_tabular('ClipFrac', average_only=True)
         logger.log_tabular('StopIter', average_only=True)
         logger.log_tabular('Time', time.time() - start_time)
+        logger.log_tabular('AVG Time Per Epoch', (time.time() - start_time) / (epoch + 1))
         logger.dump_tabular()
 
 

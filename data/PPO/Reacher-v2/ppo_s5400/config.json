@@ -1,0 +1,44 @@
+{
+    "ac_kwargs":	{
+        "hidden_sizes":	[
+            256,
+            256
+        ]
+    },
+    "actor_critic":	"MLPActorCritic",
+    "clip_ratio":	0.2,
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f55d6802e18>",
+    "epochs":	200,
+    "exp_name":	"ppo",
+    "gamma":	0.99,
+    "lam":	0.97,
+    "logger":	{
+        "<utils.logger.EpochLogger object at 0x7f55b5505f28>":	{
+            "epoch_dict":	{},
+            "exp_name":	"ppo",
+            "first_row":	true,
+            "log_current_row":	{},
+            "log_headers":	[],
+            "output_dir":	"./data/PPO/Reacher-v2/ppo_s5400",
+            "output_file":	{
+                "<_io.TextIOWrapper name='./data/PPO/Reacher-v2/ppo_s5400/progress.txt' mode='w' encoding='UTF-8'>":	{
+                    "mode":	"w"
+                }
+            }
+        }
+    },
+    "logger_kwargs":	{
+        "exp_name":	"ppo",
+        "output_dir":	"./data/PPO/Reacher-v2/ppo_s5400"
+    },
+    "max_ep_len":	1000,
+    "num_test_episodes":	10,
+    "pi_lr":	0.0003,
+    "save_freq":	10,
+    "seed":	5400,
+    "steps_per_epoch":	5000,
+    "target_kl":	0.01,
+    "train_pi_iters":	80,
+    "train_v_iters":	80,
+    "vf_lr":	0.001
+}

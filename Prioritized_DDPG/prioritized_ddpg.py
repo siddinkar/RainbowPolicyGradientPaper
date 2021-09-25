@@ -5,6 +5,7 @@ from torch.optim import Adam
 import gym
 import time
 import DDPG.core as core
+import torch.nn.functional as F
 from utils.logger import EpochLogger, setup_logger_kwargs
 
 from utils.replay_buffer import PrioritizedReplayBuffer
@@ -57,6 +58,9 @@ def prioritized_ddpg(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(),
     def compute_loss_q(data):
         o, a, r, o2, d, w, idxes = data['obs'], data['act'], data['rew'], data['obs2'], data['done'], data["weights"], data["idxes"]
 
+        w = np.ones_like(r)
+        w = np.sqrt(w)
+
         o = torch.FloatTensor(o).cuda(device)
         a = torch.FloatTensor(a).cuda(device)
         r = torch.FloatTensor(r).cuda(device)
@@ -70,17 +74,23 @@ def prioritized_ddpg(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(),
         # Bellman backup for Q function
         with torch.no_grad():
             q_pi_targ = ac_targ.q(o2, ac_targ.pi(o2))
-            backup = r + gamma * (1 - d) * q_pi_targ
-            backup2 = r + (d * gamma * q_pi_targ).detach()
+            backup = r + (gamma * (1 - d) * q_pi_targ).detach()
 
 
         # update PER priorities
-        td_errors = (backup2 - q).cpu().detach().numpy()
+        TD_error = (backup - q)
+
+        # MSE loss against Bellman backup
+        #loss_q = ((q - backup) ** 2).mean()
+        weighted_td_errors = torch.mul(TD_error, w)
+        zero_tensor = torch.zeros(weighted_td_errors.shape).cuda(device)
+        loss_q = F.mse_loss(weighted_td_errors, zero_tensor)
+
+
+        td_errors = TD_error.cpu().detach().numpy()
         new_priorities = np.abs(td_errors) + prioritized_replay_eps
         replay_buffer.update_priorities(idxes, new_priorities)
 
-        # MSE loss against Bellman backup
-        loss_q = ((q - backup) ** 2).mean()
 
         # Useful info for logging
         loss_info = dict(QVals=q.cpu().detach().numpy())
@@ -223,6 +233,7 @@ def prioritized_ddpg(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(),
             logger.log_tabular('LossPi', average_only=True)
             logger.log_tabular('LossQ', average_only=True)
             logger.log_tabular('Time', time.time() - start_time)
+            logger.log_tabular('AVG Time Per Epoch', (time.time() - start_time) / epoch)
             logger.dump_tabular()
 
 

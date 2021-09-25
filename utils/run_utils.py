@@ -23,7 +23,7 @@ import zlib
 
 DIV_LINE_WIDTH = 80
 
-def call_experiment(exp_name, thunk, seed=0, num_cpu=1, data_dir=None,
+def call_experiment(exp_name, env, thunk, seed=0, num_cpu=1, data_dir=None,
                     datestamp=False, **kwargs):
 
 
@@ -43,7 +43,7 @@ def call_experiment(exp_name, thunk, seed=0, num_cpu=1, data_dir=None,
 
     # Set up logger output directory
     if 'logger_kwargs' not in kwargs:
-        kwargs['logger_kwargs'] = setup_logger_kwargs(exp_name, seed, data_dir, datestamp)
+        kwargs['logger_kwargs'] = setup_logger_kwargs(exp_name, env, seed, data_dir, datestamp)
     else:
         print('Note: Call experiment is not handling logger_kwargs.\n')
 
@@ -320,7 +320,7 @@ class ExperimentGrid:
         new_variants = [unflatten_var(var) for var in flat_variants]
         return new_variants
 
-    def run(self, thunk, num_cpu=1, data_dir=None, datestamp=False):
+    def run(self, thunk, env_name=None, num_cpu=1, data_dir=None, datestamp=False):
 
 
         # Print info about self.
@@ -367,12 +367,11 @@ class ExperimentGrid:
                 # name as the string you passed for thunk, and that
                 # variant[thunk] is a valid callable function.
                 thunk_ = var[thunk]
-                del var[thunk]
             else:
                 # Assume thunk is given as a function.
                 thunk_ = thunk
 
-            call_experiment(exp_name, thunk_, num_cpu=num_cpu,
+            call_experiment(exp_name, env_name, thunk_, num_cpu=num_cpu,
                             data_dir=data_dir, datestamp=datestamp, **var)
 
 

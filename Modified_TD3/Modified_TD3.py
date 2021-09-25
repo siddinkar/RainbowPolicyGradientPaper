@@ -73,12 +73,12 @@ def modified_td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), see
     for p in ac_targ.parameters():
         p.requires_grad = False
 
-    q_params = itertools.chain(ac.q1.parameters(), ac.q2.parameters(), ac.q3.parameters())
+    q_params = itertools.chain(ac.q1.parameters(), ac.q2.parameters())
 
     replay_buffer = Buffer(obs_dim=obs_dim, act_dim=act_dim, size=replay_size)
 
-    var_counts = tuple(core.count_vars(module) for module in [ac.pi, ac.q1, ac.q2, ac.q3])
-    logger.log('\nNumber of parameters: \t pi: %d, \t q1: %d, \t q2: %d, \t q3: %d\n' % var_counts)
+    var_counts = tuple(core.count_vars(module) for module in [ac.pi, ac.q1, ac.q2])
+    logger.log('\nNumber of parameters: \t pi: %d, \t q1: %d, \t q2: %d\n' % var_counts)
 
     def compute_loss_q(data):
         o, a, r, o2, d = data['obs'], data['act'], data['rew'], data['obs2'], data['done']
@@ -92,7 +92,6 @@ def modified_td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), see
         # estimates
         q1 = ac.q1(o, a)
         q2 = ac.q2(o, a)
-        q3 = ac.q3(o, a)
 
         # Bellman Backup
         with torch.no_grad():
@@ -107,21 +106,17 @@ def modified_td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), see
             # Target Q-values
             q1_pi_targ = ac_targ.q1(o2, a2)
             q2_pi_targ = ac_targ.q2(o2, a2)
-            q3_pi_targ = ac_targ.q3(o2, a2)
             q_pi_targ = torch.min(q1_pi_targ, q2_pi_targ)
-            q_pi_targ = torch.min(q_pi_targ, q3_pi_targ)
             backup = r + gamma * (1 - d) * q_pi_targ
 
             # MSE loss against Bellman backup
         loss_q1 = ((q1 - backup) ** 2).mean()
         loss_q2 = ((q2 - backup) ** 2).mean()
-        loss_q3 = ((q3 - backup) ** 2).mean()
-        loss_q = loss_q1 + loss_q2 + loss_q3
+        loss_q = loss_q1 + loss_q2
 
         # Useful info for logging
         loss_info = dict(Q1Vals=q1.cpu().detach().numpy(),
-                         Q2Vals=q2.cpu().detach().numpy(),
-                         Q3Vals=q3.cpu().detach().numpy())
+                         Q2Vals=q2.cpu().detach().numpy())
 
         return loss_q, loss_info
 
@@ -253,10 +248,10 @@ def modified_td3(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), see
                 logger.log_tabular('Time Steps', t)
                 logger.log_tabular('Q1Vals', with_min_and_max=True)
                 logger.log_tabular('Q2Vals', with_min_and_max=True)
-                logger.log_tabular('Q3Vals', with_min_and_max=True)
                 logger.log_tabular('LossPi', average_only=True)
                 logger.log_tabular('LossQ', average_only=True)
                 logger.log_tabular('Time', time.time() - start_time)
+                logger.log_tabular('AVG Time Per Epoch', (time.time() - start_time) / epoch)
                 logger.dump_tabular()
 
 if __name__ == '__main__':

@@ -1,0 +1,50 @@
+{
+    "ac_kwargs":	{
+        "hidden_sizes":	[
+            256,
+            256
+        ]
+    },
+    "actor_critic":	"MLPActorCritic",
+    "alpha":	0.2,
+    "batch_size":	100,
+    "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7fb1b721de18>",
+    "epochs":	200,
+    "exp_name":	"integrated_algo",
+    "gamma":	0.99,
+    "logger":	{
+        "<utils.logger.EpochLogger object at 0x7fb1b708da20>":	{
+            "epoch_dict":	{},
+            "exp_name":	"integrated_algo",
+            "first_row":	true,
+            "log_current_row":	{},
+            "log_headers":	[],
+            "output_dir":	"./data/misc/Hopper-v2/integrated_algo_s3769",
+            "output_file":	{
+                "<_io.TextIOWrapper name='./data/misc/Hopper-v2/integrated_algo_s3769/progress.txt' mode='w' encoding='UTF-8'>":	{
+                    "mode":	"w"
+                }
+            }
+        }
+    },
+    "logger_kwargs":	{
+        "exp_name":	"integrated_algo",
+        "output_dir":	"./data/misc/Hopper-v2/integrated_algo_s3769"
+    },
+    "lr":	0.001,
+    "max_ep_len":	1000,
+    "num_test_episodes":	10,
+    "policy_delay":	3,
+    "polyak":	0.995,
+    "prioritized_replay_alpha":	0.6,
+    "prioritized_replay_beta0":	0.6,
+    "prioritized_replay_beta_iters":	null,
+    "prioritized_replay_eps":	1e-06,
+    "replay_size":	1000000,
+    "save_freq":	1,
+    "seed":	3769,
+    "start_steps":	10000,
+    "steps_per_epoch":	5000,
+    "update_after":	1000,
+    "update_every":	50
+}

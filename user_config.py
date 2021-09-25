@@ -9,11 +9,12 @@ DEFAULT_BACKEND = {
     'ppo': 'pytorch',
     'ddpg': 'pytorch',
     'td3': 'pytorch',
-    'sac': 'pytorch'
+    'sac': 'pytorch',
+    'integrated_algo': 'pytorch'
 }
 
 # Where experiment outputs are saved by default:
-DEFAULT_DATA_DIR = osp.join(osp.abspath(osp.dirname(osp.dirname(__file__))),'data')
+DEFAULT_DATA_DIR = osp.join(osp.abspath(osp.dirname(osp.dirname(__file__))),'algos/data')
 
 # Whether to automatically insert a date and time stamp into the names of
 # save directories:

@@ -18,10 +18,11 @@ from TD3.TD3 import td3 as td3_pytorch
 from DDPG.ddpg import ddpg as ddpg_pytorch
 from Modified_TD3.Modified_TD3 import modified_td3 as modified_td3_pytorch
 from Prioritized_DDPG.prioritized_ddpg import prioritized_ddpg as prioritized_ddpg_pytorch
+from IntegratedAlgorithm.integrated_algo import integrated_algo as integrated_algo_pytorch
 
 # Command line args that will go to ExperimentGrid.run, and must possess unique
 # values (therefore must be treated separately).
-RUN_KEYS = ['num_cpu', 'data_dir', 'datestamp']
+RUN_KEYS = ['env_name', 'num_cpu', 'data_dir', 'datestamp']
 
 # Command line sweetener, allowing short-form flags for common, longer flags.
 SUBSTITUTIONS = {'env': 'env_name',
@@ -31,7 +32,7 @@ SUBSTITUTIONS = {'env': 'env_name',
                  'dt': 'datestamp'}
 
 # Algo names (used in a few places)
-BASE_ALGO_NAMES = ['td3', 'sac', 'ppo', 'ddpg', 'modified_td3', 'prioritized_ddpg']
+BASE_ALGO_NAMES = ['td3', 'sac', 'ppo', 'ddpg', 'modified_td3', 'prioritized_ddpg', 'integrated_algo']
 
 
 def add_with_backends(algo_list):
@@ -130,13 +131,15 @@ def parse_and_execute_grid_search(cmd, args):
     # for an experiment grid, separate them from the arg dict, and make sure
     # that they have unique values. The special args are given by RUN_KEYS.
     run_kwargs = dict()
+    print(arg_dict)
     for k in RUN_KEYS:
         if k in arg_dict:
             val = arg_dict[k]
             assert len(val) == 1, \
                 friendly_err("You can only provide one value for %s."%k)
             run_kwargs[k] = val[0]
-            del arg_dict[k]
+            if k != 'env_name':
+                del arg_dict[k]
 
     # Determine experiment name. If not given by user, will be determined
     # by the algorithm name.
@@ -175,6 +178,8 @@ def parse_and_execute_grid_search(cmd, args):
     eg = ExperimentGrid(name=exp_name)
     for k,v in arg_dict.items():
         eg.add(k, v, shorthand=given_shorthands.get(k))
+
+    print(run_kwargs)
     eg.run(algo, **run_kwargs)
 
 

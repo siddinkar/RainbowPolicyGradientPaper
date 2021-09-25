@@ -65,11 +65,12 @@ def load_pytorch_policy(fpath, itr, deterministic=False):
     print('\n\nLoading from %s.\n\n' % fname)
 
     model = torch.load(fname)
+    model.to("cuda:0")
 
     # make function for producing an action given a single state
     def get_action(x):
         with torch.no_grad():
-            x = torch.as_tensor(x, dtype=torch.float32)
+            x = torch.as_tensor(x, dtype=torch.float32).cuda("cuda:0")
             action = model.act(x)
         return action
 

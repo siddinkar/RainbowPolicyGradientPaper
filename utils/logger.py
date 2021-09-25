@@ -13,13 +13,15 @@ from user_config import DEFAULT_DATA_DIR, FORCE_DATESTAMP, \
 
 
 
-def setup_logger_kwargs(exp_name, seed=None, data_dir=None, datestamp=False):
+def setup_logger_kwargs(exp_name, env, seed=None, data_dir=None, datestamp=False):
     # Datestamp forcing
     datestamp = datestamp or FORCE_DATESTAMP
+    print(exp_name)
+    print(env)
 
     # Make base path
     ymd_time = time.strftime("%Y-%m-%d_") if datestamp else ''
-    relpath = ''.join([ymd_time, exp_name])
+    relpath = ''.join([ymd_time, env])
 
     if seed is not None:
         # Make a seed-specific subfolder in the experiment directory.

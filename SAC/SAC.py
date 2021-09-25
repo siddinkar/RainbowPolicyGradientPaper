@@ -254,6 +254,7 @@ def sac(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), seed=0,
             logger.log_tabular('LossPi', average_only=True)
             logger.log_tabular('LossQ', average_only=True)
             logger.log_tabular('Time', time.time() - start_time)
+            logger.log_tabular('AVG Time Per Epoch', (time.time() - start_time) / epoch)
             logger.dump_tabular()
 
 
