@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import numpy as np
-import torch.nn.functional as F
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -16,53 +15,33 @@ def count_vars(module):
 def mlp(sizes, activation, output_activation=nn.Identity()):
     layers = []
     for i in range(len(sizes) - 1):
-        if i == 0:
-            layers.append(nn.Linear(sizes[i], sizes[i+1]))
-        else:
-            layers.append(nn.Linear(sizes[i] + sizes[0], sizes[i+1]))
-    return layers
+        act = activation if i < len(sizes) - 2 else output_activation;
+        layers += [nn.Linear(sizes[i], sizes[i+1]), act]
+    return nn.Sequential(*layers)
 
 class MLPActor(nn.Module):
 
     def __init__(self, obs_dim, act_dim, hidden_sizes, activation, act_limit):
         super(MLPActor, self).__init__()
-        assert len(hidden_sizes) == 2
-        self.pi_layers = mlp([obs_dim] + list(hidden_sizes) + [act_dim], activation, nn.Tanh())
-        self.l1, self.l2, self.l3 = self.pi_layers
+        self.pi = mlp([obs_dim] + list(hidden_sizes) + [act_dim], activation, nn.Tanh() )
         self.act_limit = torch.as_tensor(act_limit).cuda(device)
 
+
     def forward(self, obs):
-        a = F.relu(self.l1(obs))
-
-        a = torch.cat([a, obs], -1)
-        a = F.relu(self.l2(a))
-
-        a = torch.cat([a, obs], -1)
-
-        return self.act_limit * torch.tanh(self.l3(a))
+        #print((self.act_limit).device)
+        #print((self.pi(obs)).device)
+        return self.act_limit * self.pi(obs)
 
 
 class MLPCritic(nn.Module):
 
     def __init__(self, obs_dim, act_dim, hidden_sizes, activation):
         super(MLPCritic, self).__init__()
-        assert len(hidden_sizes) == 2
-        self.q_layers = mlp([obs_dim + act_dim] + list(hidden_sizes) + [1], activation)
-        self.l1, self.l2, self.l3 = self.q_layers
+        self.q = mlp([obs_dim + act_dim] + list(hidden_sizes) + [1], activation)
 
 
     def forward(self, obs, act):
-        sa = torch.cat([obs, act], dim=-1)
-
-        q = F.relu(self.l1(sa))
-
-        q = torch.cat([q, sa], -1)
-        q = F.relu(self.l2(q))
-
-        q = torch.cat([q, sa], -1)
-
-        q = self.l3(q)
-
+        q = self.q(torch.cat([obs, act], dim=-1))
         return torch.squeeze(q, -1)
 
 
@@ -83,4 +62,3 @@ class MLPActorCritic(nn.Module):
     def act(self, obs):
         with torch.no_grad():
             return self.pi(obs).cpu().numpy()
-

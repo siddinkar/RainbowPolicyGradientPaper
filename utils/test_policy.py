@@ -77,7 +77,7 @@ def load_pytorch_policy(fpath, itr, deterministic=False):
     return get_action
 
 
-def run_policy(env, get_action, max_ep_len=None, num_episodes=100, render=True, fpath=None, output_fname=None, exp_name=None):
+def run_policy(env, get_action, max_ep_len=None, num_episodes=100, render=False, fpath=None, output_fname=None, exp_name=None):
     assert env is not None, \
         "Environment not found!\n\n It looks like the environment wasn't saved, " + \
         "and we can't run the agent in it. :( \n\n Check out the readthedocs " + \
@@ -112,7 +112,7 @@ if __name__ == '__main__':
     parser.add_argument('fpath', type=str)
     parser.add_argument('--len', '-l', type=int, default=0)
     parser.add_argument('--episodes', '-n', type=int, default=100)
-    parser.add_argument('--norender', '-nr', action='store_true')
+    parser.add_argument('--norender', '-nr', action='store_false')
     parser.add_argument('--itr', '-i', type=int, default=-1)
     parser.add_argument('--deterministic', '-d', action='store_true')
     parser.add_argument('--output_fname', type=str, default='eval.txt')

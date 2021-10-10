@@ -1,0 +1,2 @@
+AverageEpRet	StdEpRet	MaxEpRet	MinEpRet	EpLen
+3717.175	4.8165197	3725.6616	3694.286	1000.0

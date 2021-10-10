@@ -1,0 +1,2 @@
+AverageEpRet	StdEpRet	MaxEpRet	MinEpRet	EpLen
+2822.1123	778.1978	3392.866	69.37511	845.01

@@ -1,0 +1,2 @@
+AverageEpRet	StdEpRet	MaxEpRet	MinEpRet	EpLen
+2242.7358	1266.8693	6945.997	118.53549	240.29

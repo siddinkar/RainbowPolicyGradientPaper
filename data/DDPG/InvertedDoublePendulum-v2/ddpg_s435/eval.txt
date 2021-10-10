@@ -1,0 +1,2 @@
+AverageEpRet	StdEpRet	MaxEpRet	MinEpRet	EpLen
+9224.324	0.9345791	9226.912	9222.084	1000.0

@@ -18,7 +18,7 @@ def integrated_algo(env_fn, actor_critic=core.MLPActorCritic, ac_kwargs=dict(), 
         steps_per_epoch=5000, epochs=200, replay_size=int(1e6), gamma=0.99,
         polyak=0.995, lr=1e-3, alpha=0.2, batch_size=100, start_steps=10000,
         update_after=1000, update_every=50, num_test_episodes=10, max_ep_len=1000,
-        logger_kwargs=dict(), save_freq=1, policy_delay=3):
+        logger_kwargs=dict(), save_freq=1, policy_delay=2):
 
     prioritized_replay_alpha = 0.6
     prioritized_replay_beta0 = 0.6

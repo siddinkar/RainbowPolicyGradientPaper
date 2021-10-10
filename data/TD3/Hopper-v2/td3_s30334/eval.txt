@@ -1,0 +1,2 @@
+AverageEpRet	StdEpRet	MaxEpRet	MinEpRet	EpLen
+3468.1733	2.291672	3474.0483	3463.7065	1000.0
