@@ -2157,15 +2157,15 @@
 \definecolor{currentstroke}{rgb}{0.298039,0.447059,0.690196}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{3.956590in}{2.980285in}}%
-\pgfpathlineto{\pgfqpoint{4.373256in}{2.980285in}}%
+\pgfpathmoveto{\pgfqpoint{2.131910in}{4.539583in}}%
+\pgfpathlineto{\pgfqpoint{2.312465in}{4.539583in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.150000,0.150000,0.150000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.539923in,y=2.907368in,left,base]{\color{textcolor}\sffamily\fontsize{15.000000}{18.000000}\selectfont integrated\_algo}%
+\pgftext[x=2.456910in,y=4.476389in,left,base]{\color{textcolor}\sffamily\fontsize{13.000000}{15.600000}\selectfont 0}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetroundcap%
@@ -2174,15 +2174,15 @@
 \definecolor{currentstroke}{rgb}{0.333333,0.658824,0.407843}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{3.956590in}{2.691396in}}%
-\pgfpathlineto{\pgfqpoint{4.373256in}{2.691396in}}%
+\pgfpathmoveto{\pgfqpoint{2.899617in}{4.539583in}}%
+\pgfpathlineto{\pgfqpoint{3.080173in}{4.539583in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.150000,0.150000,0.150000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.539923in,y=2.618480in,left,base]{\color{textcolor}\sffamily\fontsize{15.000000}{18.000000}\selectfont integrated\_algo\_0.4}%
+\pgftext[x=3.224617in,y=4.476389in,left,base]{\color{textcolor}\sffamily\fontsize{13.000000}{15.600000}\selectfont 0.4 --> 1}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetroundcap%
@@ -2191,15 +2191,15 @@
 \definecolor{currentstroke}{rgb}{0.768627,0.305882,0.321569}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{3.956590in}{2.402508in}}%
-\pgfpathlineto{\pgfqpoint{4.373256in}{2.402508in}}%
+\pgfpathmoveto{\pgfqpoint{4.143303in}{4.539583in}}%
+\pgfpathlineto{\pgfqpoint{4.323859in}{4.539583in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.150000,0.150000,0.150000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.539923in,y=2.329591in,left,base]{\color{textcolor}\sffamily\fontsize{15.000000}{18.000000}\selectfont integrated\_algo\_0.6}%
+\pgftext[x=4.468303in,y=4.476389in,left,base]{\color{textcolor}\sffamily\fontsize{13.000000}{15.600000}\selectfont 0.6 --> 1}%
 \end{pgfscope}%
 \end{pgfpicture}%
 \makeatother%

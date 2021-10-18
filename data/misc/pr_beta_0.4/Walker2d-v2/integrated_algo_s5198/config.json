@@ -10,7 +10,7 @@
     "batch_size":	100,
     "env_fn":	"<function call_experiment.<locals>.thunk_plus.<locals>.<lambda> at 0x7f3dd9140e18>",
     "epochs":	200,
-    "exp_name":	"integrated_algo_0.4",
+    "exp_name":	"0.4 --> 1",
     "gamma":	0.99,
     "logger":	{
         "<utils.logger.EpochLogger object at 0x7f3dd8fb09e8>":	{
